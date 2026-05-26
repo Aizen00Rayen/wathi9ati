@@ -17,8 +17,8 @@ const CONTACT_INFO = [
   {
     icon: Mail,
     label: 'البريد الإلكتروني',
-    value: 'contact@wathi9ati.site',
-    href: 'mailto:contact@wathi9ati.site',
+    value: 'contact@wathi9ati.space',
+    href: 'mailto:contact@wathi9ati.space',
   },
   {
     icon: Phone,

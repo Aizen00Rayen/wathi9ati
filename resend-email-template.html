@@ -1,39 +1,4 @@
-const express = require('express');
-const router = express.Router();
-const { body, validationResult } = require('express-validator');
-const { RateLimiterMemory } = require('rate-limiter-flexible');
-const { Resend } = require('resend');
-const { getDb } = require('../db/database');
-
-const contactLimiter = new RateLimiterMemory({
-  points: 3,
-  duration: 3600,
-  keyPrefix: 'contact',
-});
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-// ─── HTML Email Template ──────────────────────────────────────────────────────
-function buildEmailHtml({ name, email, subject, message }) {
-  const date = new Date().toLocaleDateString('ar-DZ', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-
-  // Escape HTML to prevent injection
-  const esc = (str) =>
-    String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/\n/g, '<br>');
-
-  return `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -80,14 +45,14 @@ function buildEmailHtml({ name, email, subject, message }) {
                   <td width="50%" style="padding-left:8px;">
                     <div style="background:#F5F0E8;border-radius:10px;padding:16px 18px;">
                       <p style="margin:0 0 4px;font-size:11px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">الاسم</p>
-                      <p style="margin:0;font-size:15px;color:#0D1B2A;font-weight:600;">${esc(name)}</p>
+                      <p style="margin:0;font-size:15px;color:#0D1B2A;font-weight:600;">{{name}}</p>
                     </div>
                   </td>
                   <td width="50%" style="padding-right:8px;">
                     <div style="background:#F5F0E8;border-radius:10px;padding:16px 18px;">
                       <p style="margin:0 0 4px;font-size:11px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">البريد الإلكتروني</p>
                       <p style="margin:0;font-size:15px;color:#0D1B2A;font-weight:600;">
-                        <a href="mailto:${esc(email)}" style="color:#C9A84C;text-decoration:none;">${esc(email)}</a>
+                        <a href="mailto:{{email}}" style="color:#C9A84C;text-decoration:none;">{{email}}</a>
                       </p>
                     </div>
                   </td>
@@ -97,18 +62,18 @@ function buildEmailHtml({ name, email, subject, message }) {
               <!-- Subject -->
               <div style="background:#0D1B2A;border-radius:10px;padding:16px 20px;margin-bottom:24px;">
                 <p style="margin:0 0 4px;font-size:11px;color:rgba(201,168,76,.6);font-weight:600;text-transform:uppercase;letter-spacing:.5px;">الموضوع</p>
-                <p style="margin:0;font-size:17px;color:#C9A84C;font-weight:700;">${esc(subject)}</p>
+                <p style="margin:0;font-size:17px;color:#C9A84C;font-weight:700;">{{subject}}</p>
               </div>
 
               <!-- Message -->
               <div style="border:1px solid #e5e7eb;border-radius:10px;padding:24px;">
                 <p style="margin:0 0 12px;font-size:11px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">الرسالة</p>
-                <p style="margin:0;font-size:15px;color:#4A5568;line-height:1.8;">${esc(message)}</p>
+                <p style="margin:0;font-size:15px;color:#4A5568;line-height:1.8;">{{message}}</p>
               </div>
 
               <!-- Reply CTA -->
               <div style="text-align:center;margin-top:32px;">
-                <a href="mailto:${esc(email)}?subject=رد: ${esc(subject)}"
+                <a href="mailto:{{email}}?subject=رد: {{subject}}"
                    style="display:inline-block;background:#0D1B2A;color:#C9A84C;text-decoration:none;
                           font-weight:700;font-size:15px;padding:14px 36px;border-radius:10px;
                           border:2px solid #C9A84C;letter-spacing:.3px;">
@@ -123,7 +88,7 @@ function buildEmailHtml({ name, email, subject, message }) {
           <tr>
             <td style="background:#0D1B2A;border-radius:0 0 16px 16px;padding:24px 40px;text-align:center;">
               <p style="margin:0 0 6px;color:rgba(245,240,232,.45);font-size:12px;">
-                📅 &nbsp; ${date}
+                📅 &nbsp; {{date}}
               </p>
               <p style="margin:0;color:rgba(245,240,232,.3);font-size:11px;">
                 تم الإرسال عبر نموذج التواصل في موقع وثيقتي
@@ -139,62 +104,4 @@ function buildEmailHtml({ name, email, subject, message }) {
   </table>
 
 </body>
-</html>`;
-}
-
-// ─── Route ────────────────────────────────────────────────────────────────────
-router.post(
-  '/',
-  [
-    body('name').trim().notEmpty().withMessage('الاسم مطلوب').isLength({ max: 100 }),
-    body('email').isEmail().withMessage('البريد الإلكتروني غير صالح').normalizeEmail(),
-    body('subject').trim().notEmpty().withMessage('الموضوع مطلوب').isLength({ max: 200 }),
-    body('message')
-      .trim()
-      .isLength({ min: 20 })
-      .withMessage('الرسالة يجب أن تحتوي على 20 حرفاً على الأقل')
-      .isLength({ max: 2000 }),
-  ],
-  async (req, res) => {
-    const ip = req.ip || req.connection.remoteAddress;
-
-    try {
-      await contactLimiter.consume(ip);
-    } catch {
-      return res.status(429).json({
-        message: 'لقد أرسلت عدداً كبيراً من الرسائل. حاول مجدداً بعد ساعة.',
-      });
-    }
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() });
-    }
-
-    const { name, email, subject, message } = req.body;
-
-    // 1 — Save to DB
-    const db = getDb();
-    db.prepare(
-      'INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)'
-    ).run(name, email, subject, message);
-
-    // 2 — Send email via Resend
-    try {
-      await resend.emails.send({
-        from: 'وثيقتي <noreply@wathi9ati.space>',
-        to: ['contact@wathi9ati.space'],
-        reply_to: email,
-        subject: `📩 رسالة جديدة: ${subject}`,
-        html: buildEmailHtml({ name, email, subject, message }),
-      });
-    } catch (emailErr) {
-      // Log but don't fail the request — message is already saved in DB
-      console.error('Resend error:', emailErr?.message || emailErr);
-    }
-
-    res.status(201).json({ message: 'تم إرسال رسالتك بنجاح. سنرد عليك قريباً.' });
-  }
-);
-
-module.exports = router;
+</html>
