@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    direction: rtl;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    background-color: #F5F0E8;
+    color: #4A5568;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Amiri', serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-navy text-gold font-semibold px-6 py-3 rounded-lg
+           hover:bg-navy-light transition-all duration-200
+           shadow-md hover:shadow-gold active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply border-2 border-gold text-gold font-semibold px-6 py-3 rounded-lg
+           hover:bg-gold hover:text-navy transition-all duration-200
+           active:scale-95;
+  }
+
+  .btn-danger {
+    @apply bg-danger text-white font-semibold px-4 py-2 rounded-lg
+           hover:opacity-90 transition-all duration-200 active:scale-95;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-card border-r-4 border-gold p-5
+           hover:shadow-card-hover transition-shadow duration-200;
+  }
+
+  .input-field {
+    @apply w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3
+           text-slate placeholder-gray-400 focus:outline-none
+           focus:border-gold focus:ring-2 focus:ring-gold/20
+           transition-all duration-200;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-slate mb-1.5;
+  }
+
+  .section-title {
+    @apply font-amiri text-3xl font-bold text-navy;
+  }
+
+  .frosted-nav {
+    @apply bg-white/80 backdrop-blur-md shadow-sm;
+  }
+}
+
+@layer utilities {
+  .font-amiri {
+    font-family: 'Amiri', serif;
+  }
+
+  .font-ibm {
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+  }
+
+  .text-shadow {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Floating animation for hero PDF cards */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(-3deg); }
+  50% { transform: translateY(-18px) rotate(-3deg); }
+}
+@keyframes float2 {
+  0%, 100% { transform: translateY(0px) rotate(4deg); }
+  50% { transform: translateY(-12px) rotate(4deg); }
+}
+@keyframes float3 {
+  0%, 100% { transform: translateY(0px) rotate(-1deg); }
+  50% { transform: translateY(-22px) rotate(-1deg); }
+}
+
+.animate-float { animation: float 4s ease-in-out infinite; }
+.animate-float2 { animation: float2 5.5s ease-in-out infinite; }
+.animate-float3 { animation: float3 3.8s ease-in-out infinite; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #F5F0E8; }
+::-webkit-scrollbar-thumb { background: #C9A84C; border-radius: 3px; }

@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Environment files (never commit secrets)
+.env
+backend/.env
+frontend/.env
+
+# SQLite database
+*.db
+*.db-shm
+*.db-wal
+
+# Uploaded files
+backend/uploads/
+
+# Build output
+frontend/dist/
+frontend/.vite/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Claude
+.claude/
