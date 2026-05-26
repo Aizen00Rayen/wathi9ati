@@ -1,0 +1,28 @@
+{
+  "name": "wathi9ati",
+  "version": "1.0.0",
+  "description": "وثيقتي — Secure personal document wallet for Algerian users",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "cd frontend && npm install && npm run build",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^9.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-validator": "^7.0.1",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "rate-limiter-flexible": "^5.0.3",
+    "uuid": "^9.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

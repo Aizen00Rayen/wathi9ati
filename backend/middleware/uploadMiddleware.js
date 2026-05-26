@@ -4,7 +4,8 @@ const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 
 const MAX_SIZE_MB = parseInt(process.env.MAX_FILE_SIZE_MB || '10');
-const UPLOAD_BASE = process.env.UPLOAD_PATH || './uploads';
+// Resolve upload path relative to project root (two levels up from this file)
+const UPLOAD_BASE = process.env.UPLOAD_PATH || path.join(__dirname, '..', '..', 'uploads');
 
 function ensureUserDir(userId) {
   const dir = path.join(UPLOAD_BASE, userId);

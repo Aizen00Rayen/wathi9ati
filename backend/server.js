@@ -1,10 +1,11 @@
-require('dotenv').config();
+const path = require('path');
+// Always load .env from the backend/ directory, regardless of where node is invoked
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
-const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -45,7 +46,17 @@ app.use('/api/contact', require('./routes/contact'));
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'وثيقتي' }));
 
-// 404 handler
+// Serve built React frontend in production
+const frontendDist = path.join(__dirname, '..', 'frontend', 'dist');
+if (require('fs').existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+  // SPA fallback — let React Router handle all non-API routes
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+}
+
+// 404 handler (API routes only — reached only when dist folder absent)
 app.use((req, res) => {
   res.status(404).json({ message: 'المسار غير موجود' });
 });
