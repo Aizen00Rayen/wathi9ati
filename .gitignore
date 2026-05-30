@@ -6,6 +6,8 @@ node_modules/
 .env
 backend/.env
 frontend/.env
+# .env.production is intentionally committed — it only contains the public API path
+
 
 # SQLite database
 *.db

@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  // In production: same-origin relative path served by Express.
+  // In dev: Vite proxy forwards /api → localhost:5000 (see vite.config.js).
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   withCredentials: true,
 });
 
@@ -51,7 +53,7 @@ api.interceptors.response.use(
 
       try {
         const { data } = await axios.post(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/refresh`,
+          `${import.meta.env.VITE_API_URL || '/api'}/auth/refresh`,
           {},
           { withCredentials: true }
         );

@@ -62,45 +62,46 @@ router.post(
       return true;
     }),
   ],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
 
-    const db = getDb();
-    const { name, email, password } = req.body;
+    try {
+      const db = getDb();
+      const { name, email, password } = req.body;
 
-    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
-    if (existing) {
-      return res.status(409).json({ message: 'البريد الإلكتروني مستخدم بالفعل' });
+      const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+      if (existing) {
+        return res.status(409).json({ message: 'البريد الإلكتروني مستخدم بالفعل' });
+      }
+
+      const passwordHash = bcrypt.hashSync(password, 12);
+      const userId = uuidv4();
+
+      db.prepare(
+        'INSERT INTO users (id, name, email, password_hash) VALUES (?, ?, ?, ?)'
+      ).run(userId, name, email, passwordHash);
+
+      for (const catName of DEFAULT_CATEGORIES) {
+        db.prepare('INSERT INTO categories (id, user_id, name) VALUES (?, ?, ?)').run(
+          uuidv4(), userId, catName
+        );
+      }
+
+      ensureUserDir(userId);
+
+      const user = { id: userId, name, email };
+      const { accessToken, refreshToken } = generateTokens(user);
+      storeRefreshToken(userId, refreshToken);
+      setRefreshCookie(res, refreshToken);
+
+      res.status(201).json({ accessToken, user });
+    } catch (err) {
+      console.error('Register error:', err.message);
+      res.status(500).json({ message: 'خطأ في الخادم: ' + err.message });
     }
-
-    const passwordHash = bcrypt.hashSync(password, 12);
-    const userId = uuidv4();
-
-    db.prepare(
-      'INSERT INTO users (id, name, email, password_hash) VALUES (?, ?, ?, ?)'
-    ).run(userId, name, email, passwordHash);
-
-    // Create default categories
-    for (const catName of DEFAULT_CATEGORIES) {
-      db.prepare('INSERT INTO categories (id, user_id, name) VALUES (?, ?, ?)').run(
-        uuidv4(),
-        userId,
-        catName
-      );
-    }
-
-    // Create user upload directory
-    ensureUserDir(userId);
-
-    const user = { id: userId, name, email };
-    const { accessToken, refreshToken } = generateTokens(user);
-    storeRefreshToken(userId, refreshToken);
-    setRefreshCookie(res, refreshToken);
-
-    res.status(201).json({ accessToken, user });
   }
 );
 
@@ -111,31 +112,36 @@ router.post(
     body('email').isEmail().withMessage('البريد الإلكتروني غير صالح').normalizeEmail(),
     body('password').notEmpty().withMessage('كلمة المرور مطلوبة'),
   ],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
 
-    const db = getDb();
-    const { email, password } = req.body;
+    try {
+      const db = getDb();
+      const { email, password } = req.body;
 
-    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
-    if (!user) {
-      return res.status(401).json({ message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' });
+      const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+      if (!user) {
+        return res.status(401).json({ message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' });
+      }
+
+      const valid = bcrypt.compareSync(password, user.password_hash);
+      if (!valid) {
+        return res.status(401).json({ message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' });
+      }
+
+      const userData = { id: user.id, name: user.name, email: user.email };
+      const { accessToken, refreshToken } = generateTokens(userData);
+      storeRefreshToken(user.id, refreshToken);
+      setRefreshCookie(res, refreshToken);
+
+      res.json({ accessToken, user: userData });
+    } catch (err) {
+      console.error('Login error:', err.message);
+      res.status(500).json({ message: 'خطأ في الخادم: ' + err.message });
     }
-
-    const valid = bcrypt.compareSync(password, user.password_hash);
-    if (!valid) {
-      return res.status(401).json({ message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' });
-    }
-
-    const userData = { id: user.id, name: user.name, email: user.email };
-    const { accessToken, refreshToken } = generateTokens(userData);
-    storeRefreshToken(user.id, refreshToken);
-    setRefreshCookie(res, refreshToken);
-
-    res.json({ accessToken, user: userData });
   }
 );
 
