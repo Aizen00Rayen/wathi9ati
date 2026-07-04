@@ -1,0 +1,35 @@
+# ─── Wathi9ati — root .htaccess for public_html ──────────────────────────────
+# Goes at the web root alongside the built React frontend (index.html, assets/).
+
+RewriteEngine On
+
+# Force HTTPS (comment out if you terminate TLS elsewhere)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Let the /api folder handle its own routing (do not SPA-fallback API calls)
+RewriteRule ^api($|/) - [L]
+
+# SPA fallback — serve index.html for any path that is not a real file/dir,
+# so React Router can handle client-side routes (/login, /wallet, …).
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.html [L]
+
+# ─── Security ────────────────────────────────────────────────────────────────
+# Block direct access to the storage folder (db + uploaded PDFs) if it ever
+# ends up under the web root.
+RedirectMatch 404 ^/storage/
+
+# Don't expose dotfiles / env / db files
+<FilesMatch "^\.|\.(env|db|db-wal|db-shm|sql)$">
+    Require all denied
+</FilesMatch>
+
+# Basic caching for static assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 month"
+</IfModule>

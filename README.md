@@ -5,7 +5,10 @@
 ## Stack
 
 - **Frontend**: React 18 + Vite + Tailwind CSS (RTL/Arabic)
-- **Backend**: Node.js + Express.js + SQLite (better-sqlite3)
+- **Backend**: two interchangeable implementations of the same `/api` contract:
+  - **PHP + PDO SQLite** ([`php-backend/`](php-backend/)) — for HTML/PHP shared
+    hosting (e.g. Hostinger), no Node.js required. **Recommended for hosting.**
+  - **Node.js + Express + SQLite** ([`backend/`](backend/)) — for local dev / VPS.
 - **Auth**: JWT access tokens (memory) + refresh tokens (httpOnly cookie)
 
 ## Quick Start (local)
@@ -29,7 +32,9 @@ npm run dev            # http://localhost:5173
 
 ## Deployment (Hostinger)
 
-See [DEPLOY.md](DEPLOY.md) for step-by-step Hostinger VPS deployment.
+See [DEPLOY.md](DEPLOY.md). The simplest path is **shared HTML/PHP hosting**
+using the PHP backend — no Node.js needed. See
+[php-backend/README.md](php-backend/README.md).
 
 ## Environment Variables
 

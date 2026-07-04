@@ -1,0 +1,21 @@
+# Route every /api/* request through the front controller.
+RewriteEngine On
+
+# Pass the Authorization header through to PHP (some hosts strip it)
+RewriteCond %{HTTP:Authorization} ^(.+)$
+RewriteRule ^ - [E=HTTP_AUTHORIZATION:%1]
+
+# Send all requests to index.php (it does its own routing)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [QSA,L]
+
+# If index.php is requested directly, that's fine too.
+<IfModule mod_php.c>
+    php_value upload_max_filesize 12M
+    php_value post_max_size 13M
+</IfModule>
+
+# Never serve the raw source of includes / config / schema
+<FilesMatch "\.(sql|env)$">
+    Require all denied
+</FilesMatch>

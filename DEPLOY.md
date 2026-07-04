@@ -1,6 +1,23 @@
 # Hostinger Deployment Guide
 
-## Option A — Hostinger VPS (Node.js)
+## Option A — Hostinger Shared Hosting (PHP + SQLite) — recommended, no Node.js
+
+Host the **entire app** on ordinary HTML/PHP shared hosting — no Node.js app or
+VPS needed. The PHP backend in [`php-backend/`](php-backend/) reproduces the
+exact same `/api/*` API, so the React frontend runs against it unchanged.
+
+1. Build the frontend: `cd frontend && npm install && npm run build`.
+2. Upload to `public_html/`:
+   - contents of `frontend/dist/` → `public_html/`
+   - `php-backend/api/`           → `public_html/api/`
+   - `php-backend/.htaccess`      → `public_html/.htaccess`
+   - `php-backend/storage/`       → `public_html/storage/`
+3. Copy `php-backend/.env.example` → `public_html/.env` and set strong
+   `JWT_SECRET` / `JWT_REFRESH_SECRET` (and optionally `RESEND_API_KEY`).
+
+Full step-by-step: [`php-backend/README.md`](php-backend/README.md).
+
+## Option B — Hostinger VPS (Node.js)
 
 ### 1. Upload files
 Upload the `backend/` and `frontend/` folders to your VPS via SSH or Hostinger File Manager.
@@ -57,6 +74,6 @@ server {
 certbot --nginx -d yourdomain.com
 ```
 
-## Option B — Hostinger Shared Hosting (static frontend only)
+## Option C — Static frontend only
 Upload `frontend/dist/` contents to `public_html/`.
 Host the backend on a separate VPS or cloud service.

@@ -6,6 +6,8 @@ node_modules/
 .env
 backend/.env
 frontend/.env
+php-backend/.env
+php-backend/api/.env
 # .env.production is intentionally committed — it only contains the public API path
 
 
@@ -16,6 +18,8 @@ frontend/.env
 
 # Uploaded files
 backend/uploads/
+php-backend/storage/uploads/
+php-backend/storage/*.db*
 
 # Build output
 frontend/dist/
