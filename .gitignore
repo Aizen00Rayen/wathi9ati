@@ -24,6 +24,7 @@ php-backend/storage/*.db*
 # Build output
 frontend/dist/
 frontend/.vite/
+public_html/
 
 # Logs
 *.log

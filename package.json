@@ -4,9 +4,9 @@
   "description": "وثيقتي — Secure personal document wallet for Algerian users",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "build": "cd frontend && npm install && npm run build",
-    "dev": "node server.js"
+    "build": "node scripts/build-hostinger.js",
+    "start:node": "node server.js",
+    "dev:node": "node server.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

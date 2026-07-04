@@ -30,15 +30,24 @@ npm install
 npm run dev            # http://localhost:5173
 ```
 
-## Deployment (Hostinger)
+## Deployment (Hostinger shared hosting — recommended)
 
-See [DEPLOY.md](DEPLOY.md). The simplest path is **shared HTML/PHP hosting**
-using the PHP backend — no Node.js needed. See
-[php-backend/README.md](php-backend/README.md).
+```bash
+npm run build
+```
+
+builds the frontend and assembles a ready-to-upload `public_html/` folder at
+the repo root (built React app + PHP API + `storage/` + `.env` with generated
+JWT secrets). Upload its contents to Hostinger File Manager's `public_html/`
+and the site is live — no manual editing needed.
+
+See [DEPLOY.md](DEPLOY.md) and [php-backend/README.md](php-backend/README.md)
+for details, and for the alternative Node.js/VPS deployment path.
 
 ## Environment Variables
 
-Copy `backend/.env.example` → `backend/.env` and set strong secrets:
+For local Node.js dev, copy `backend/.env.example` → `backend/.env` and set
+strong secrets:
 
 | Variable | Description |
 |----------|-------------|
@@ -46,6 +55,8 @@ Copy `backend/.env.example` → `backend/.env` and set strong secrets:
 | `JWT_REFRESH_SECRET` | Refresh token signing key |
 | `FRONTEND_URL` | Your production frontend URL |
 | `UPLOAD_PATH` | Path for uploaded PDFs |
+
+(The PHP/Hostinger build generates its own `.env` automatically — see above.)
 
 ## Security
 

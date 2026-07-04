@@ -60,6 +60,36 @@ php-backend/
 
 ## Deploy to Hostinger (shared hosting)
 
+### The easy way — one command
+
+From the repo root:
+
+```bash
+npm run build
+```
+
+This runs `scripts/build-hostinger.js`, which:
+1. builds the frontend (`frontend/dist`),
+2. assembles a fresh `public_html/` folder at the repo root containing the
+   built frontend + `api/` + `storage/` + root `.htaccess`,
+3. generates a `.env` inside it with freshly random `JWT_SECRET` /
+   `JWT_REFRESH_SECRET` values (`NODE_ENV=production` already set).
+
+Then just **upload the contents of the generated `public_html/` folder** into
+your Hostinger File Manager's `public_html/` directory. No manual copying,
+no editing `.env` — the site works as soon as it's uploaded.
+
+Optionally edit the uploaded `.env` to set `RESEND_API_KEY` if you want the
+contact form to send emails (it works and saves messages to the DB without it).
+
+Visit your domain — the SQLite database and `uploads/` folder are created
+automatically on the first API call. Make sure PHP can write to `storage/`
+(default permissions from most File Manager uploads are fine).
+
+### The manual way
+
+If you'd rather assemble it by hand instead of running the build script:
+
 1. **Build the frontend** locally:
    ```bash
    cd frontend

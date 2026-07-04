@@ -6,16 +6,24 @@ Host the **entire app** on ordinary HTML/PHP shared hosting — no Node.js app o
 VPS needed. The PHP backend in [`php-backend/`](php-backend/) reproduces the
 exact same `/api/*` API, so the React frontend runs against it unchanged.
 
-1. Build the frontend: `cd frontend && npm install && npm run build`.
-2. Upload to `public_html/`:
-   - contents of `frontend/dist/` → `public_html/`
-   - `php-backend/api/`           → `public_html/api/`
-   - `php-backend/.htaccess`      → `public_html/.htaccess`
-   - `php-backend/storage/`       → `public_html/storage/`
-3. Copy `php-backend/.env.example` → `public_html/.env` and set strong
-   `JWT_SECRET` / `JWT_REFRESH_SECRET` (and optionally `RESEND_API_KEY`).
+**One command builds everything you need to upload:**
 
-Full step-by-step: [`php-backend/README.md`](php-backend/README.md).
+```bash
+npm run build
+```
+
+This builds the frontend and assembles a ready-to-go `public_html/` folder at
+the repo root, containing the built React app, the PHP API, `storage/`, and a
+`.env` with freshly generated JWT secrets — no manual copying or editing.
+
+Then in Hostinger File Manager: open `public_html/`, upload the **contents**
+of the generated `public_html/` folder into it (or upload the folder and move
+its contents up). That's it — the site is live.
+
+Optional: edit the uploaded `.env` to set `RESEND_API_KEY` if you want the
+contact form to send emails (it works and saves messages to the DB without it).
+
+Full details: [`php-backend/README.md`](php-backend/README.md).
 
 ## Option B — Hostinger VPS (Node.js)
 
